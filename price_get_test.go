@@ -1,6 +1,8 @@
 package main
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestPriceGet(t *testing.T) {
 	dep := "RNO"
