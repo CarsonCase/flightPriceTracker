@@ -1,17 +1,24 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 
+	"github.com/CarsonCase/flightPriceTracker.git/internal/database"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
 	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 )
 
-func setupRouter() *chi.Mux {
+type ApiConfig struct {
+	DB *database.Queries
+}
+
+func (c *ApiConfig) setupRouter() *chi.Mux {
 	router := chi.NewRouter()
 
 	router.Use(cors.Handler(cors.Options{
@@ -23,14 +30,26 @@ func setupRouter() *chi.Mux {
 		MaxAge:           300,
 	}))
 	router.Get("/flights", getFlightsHandler)
-	router.Post("/flights", createFlightHandler)
+	router.Post("/flights", c.createFlightHandler)
 	return router
 }
 
 func main() {
 	godotenv.Load()
 	portString := os.Getenv("SERVER_PORT")
-	router := setupRouter()
+
+	sqlString := os.Getenv("DB_URL")
+	connection, err := sql.Open("postgres", sqlString)
+
+	if err != nil {
+		log.Fatal("SQL error: ", err)
+	}
+
+	apiCfg := ApiConfig{
+		DB: database.New(connection),
+	}
+
+	router := apiCfg.setupRouter()
 
 	srv := &http.Server{
 		Handler: router,
@@ -39,7 +58,7 @@ func main() {
 
 	log.Printf("Server starting on port %v\n", portString)
 
-	err := srv.ListenAndServe()
+	err = srv.ListenAndServe()
 	if err != nil {
 		log.Fatal(err)
 	}

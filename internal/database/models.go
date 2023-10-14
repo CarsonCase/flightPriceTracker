@@ -17,4 +17,5 @@ type Flight struct {
 	Departure string
 	Arrival   string
 	Price     float64
+	Date      string
 }

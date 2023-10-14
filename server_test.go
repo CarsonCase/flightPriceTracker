@@ -2,18 +2,22 @@ package main
 
 import (
 	"bytes"
+	"database/sql"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
-	"github.com/CarsonCase/flightPriceTracker.git/models"
+	"github.com/CarsonCase/flightPriceTracker.git/internal/database"
+	"github.com/google/uuid"
+	"github.com/joho/godotenv"
 
 	"github.com/stretchr/testify/assert"
 )
 
-var params models.Flight = models.Flight{
-	ID:        123,
+var params database.Flight = database.Flight{
+	ID:        uuid.UUID{0},
 	Departure: "RNO",
 	Arrival:   "SFO",
 	Date:      "2023-12-12",
@@ -21,37 +25,52 @@ var params models.Flight = models.Flight{
 }
 
 func TestFlight(t *testing.T) {
+	godotenv.Load()
+	sqlString := os.Getenv("DB_URL")
+	connection, err := sql.Open("postgres", sqlString)
+
+	if err != nil {
+		t.Fatal("SQL error:", err)
+	}
+
+	apiCfg := ApiConfig{
+		DB: database.New(connection),
+	}
+
 	// post
-	str, code, err := postFlight("RNO", "SFO", "2023-12-12")
+	str, code, err := apiCfg.postFlight("RNO", "SFO", "2023-12-12")
 	if err != nil {
 		t.Fatal("postflight Error: ", err.Error())
 	}
 
 	// Check the status code and response body
 	assert.Equal(t, http.StatusOK, code)
-	assert.Contains(t, str.String(), "")
+
+	returnedParams := database.Flight{}
+	err = json.Unmarshal(str.Bytes(), &returnedParams)
+	if err != nil {
+		t.Fatal("Unmarshal error: ", err)
+	}
+
+	assert.Equal(t, returnedParams.Price, params.Price)
 
 	// get
-	str, code, err = getFlight("RNO", "SFO", "2023-12-12")
+	str, code, err = apiCfg.getFlight("RNO", "SFO", "2023-12-12")
 	if err != nil {
 		t.Fatal("getflight Error: ", err.Error())
 	}
 
-	decoder := json.NewDecoder(str)
-
-	result := models.Flight{}
-
-	err = decoder.Decode(&result)
-	if err != nil {
-		t.Fatal("decode error: ", err.Error())
-	}
-
 	// Check the status code and response body
 	assert.Equal(t, http.StatusOK, code)
-	assert.Contains(t, result, params)
+
+	err = json.Unmarshal(str.Bytes(), &returnedParams)
+	if err != nil {
+		t.Fatal("Unmarshal error: ", err)
+	}
+	assert.Equal(t, returnedParams.Price, params.Price)
 }
 
-func getFlight(departure, arrival, date string) (*bytes.Buffer, int, error) {
+func (c *ApiConfig) getFlight(departure string, arrival string, date string) (*bytes.Buffer, int, error) {
 	// Create a request to the GET /flights endpoint
 	req, err := http.NewRequest("GET", "/flights?departure=JFK&arrival=LAX&date=2023-12-13", nil)
 	if err != nil {
@@ -62,13 +81,12 @@ func getFlight(departure, arrival, date string) (*bytes.Buffer, int, error) {
 	rr := httptest.NewRecorder()
 
 	// Create your API router and handle the request
-	router := setupRouter() // Replace with your router setup function
+	router := c.setupRouter() // Replace with your router setup function
 	router.ServeHTTP(rr, req)
 	return rr.Body, rr.Code, nil
 }
 
-func postFlight(departure, arrival, date string) (*bytes.Buffer, int, error) {
-
+func (c *ApiConfig) postFlight(departure string, arrival string, date string) (*bytes.Buffer, int, error) {
 	requestBody, err := json.Marshal(params)
 	if err != nil {
 		return &bytes.Buffer{}, 0, err
@@ -84,7 +102,7 @@ func postFlight(departure, arrival, date string) (*bytes.Buffer, int, error) {
 	rr := httptest.NewRecorder()
 
 	// Create your API router and handle the request
-	router := setupRouter() // Replace with your router setup function
+	router := c.setupRouter() // Replace with your router setup function
 	router.ServeHTTP(rr, req)
 	return rr.Body, rr.Code, nil
 }

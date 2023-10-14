@@ -13,9 +13,9 @@ import (
 )
 
 const createFlight = `-- name: CreateFlight :one
-INSERT INTO Flights(ID, created_at, updated_at, departure, arrival, price)
-VALUES ($1, $2, $3, $4, $5, $6)
-RETURNING id, created_at, updated_at, departure, arrival, price
+INSERT INTO Flights(ID, created_at, updated_at, departure, arrival, date, price)
+VALUES ($1, $2, $3, $4, $5, $6, $7)
+RETURNING id, created_at, updated_at, departure, arrival, price, date
 `
 
 type CreateFlightParams struct {
@@ -24,6 +24,7 @@ type CreateFlightParams struct {
 	UpdatedAt time.Time
 	Departure string
 	Arrival   string
+	Date      string
 	Price     float64
 }
 
@@ -34,6 +35,7 @@ func (q *Queries) CreateFlight(ctx context.Context, arg CreateFlightParams) (Fli
 		arg.UpdatedAt,
 		arg.Departure,
 		arg.Arrival,
+		arg.Date,
 		arg.Price,
 	)
 	var i Flight
@@ -44,12 +46,13 @@ func (q *Queries) CreateFlight(ctx context.Context, arg CreateFlightParams) (Fli
 		&i.Departure,
 		&i.Arrival,
 		&i.Price,
+		&i.Date,
 	)
 	return i, err
 }
 
 const getFlights = `-- name: GetFlights :one
-SELECT id, created_at, updated_at, departure, arrival, price FROM Flights
+SELECT id, created_at, updated_at, departure, arrival, price, date FROM Flights
 `
 
 func (q *Queries) GetFlights(ctx context.Context) (Flight, error) {
@@ -62,6 +65,7 @@ func (q *Queries) GetFlights(ctx context.Context) (Flight, error) {
 		&i.Departure,
 		&i.Arrival,
 		&i.Price,
+		&i.Date,
 	)
 	return i, err
 }
