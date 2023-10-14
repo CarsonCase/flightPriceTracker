@@ -22,7 +22,8 @@ func setupRouter() *chi.Mux {
 		AllowCredentials: false,
 		MaxAge:           300,
 	}))
-	router.Get("/flights", flightsHandler)
+	router.Get("/flights", getFlightsHandler)
+	router.Post("/flights", createFlightHandler)
 	return router
 }
 
