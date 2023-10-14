@@ -1,4 +1,4 @@
-package main
+package PriceService
 
 import (
 	"bytes"
@@ -82,7 +82,7 @@ func sendRequest(req *http.Request) (respBody []byte, err error) {
 }
 
 func initAmadeusAuth() (*AmadeusAuth, error) {
-	godotenv.Load()
+	godotenv.Load("../.env")
 	apiKey := os.Getenv("API_KEY")
 	apiSecret := os.Getenv("API_SECRET")
 	apiURL := oauth2TokenURL
