@@ -24,7 +24,8 @@ var params database.Flight = database.Flight{
 	Price:     104.3,
 }
 
-func TestFlight(t *testing.T) {
+func FlightHappyPath(t *testing.T) {
+	// Set up
 	godotenv.Load()
 	sqlString := os.Getenv("DB_URL")
 	connection, err := sql.Open("postgres", sqlString)
@@ -37,7 +38,7 @@ func TestFlight(t *testing.T) {
 		DB: database.New(connection),
 	}
 
-	// post
+	// post a flight
 	str, code, err := apiCfg.postFlight("RNO", "SFO", "2023-12-12")
 	if err != nil {
 		t.Fatal("postflight Error: ", err.Error())
@@ -54,7 +55,7 @@ func TestFlight(t *testing.T) {
 
 	assert.Equal(t, returnedParams.Price, params.Price)
 
-	// get
+	// get the flight back
 	str, code, err = apiCfg.getFlight("RNO", "SFO", "2023-12-12")
 	if err != nil {
 		t.Fatal("getflight Error: ", err.Error())

@@ -13,17 +13,16 @@ import (
 )
 
 const createFlight = `-- name: CreateFlight :one
-INSERT INTO Flights(ID, created_at, updated_at, departure, arrival, date, price)
-VALUES ($1, $2, $3, $4, $5, $6, $7)
-RETURNING id, created_at, updated_at, departure, arrival, price, date
+INSERT INTO Flights(ID, created_at, updated_at, route, date, price)
+VALUES ($1, $2, $3, $4, $5, $6)
+RETURNING id, created_at, updated_at, price, date, route
 `
 
 type CreateFlightParams struct {
 	ID        uuid.UUID
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	Departure string
-	Arrival   string
+	Route     uuid.UUID
 	Date      string
 	Price     float64
 }
@@ -33,8 +32,7 @@ func (q *Queries) CreateFlight(ctx context.Context, arg CreateFlightParams) (Fli
 		arg.ID,
 		arg.CreatedAt,
 		arg.UpdatedAt,
-		arg.Departure,
-		arg.Arrival,
+		arg.Route,
 		arg.Date,
 		arg.Price,
 	)
@@ -43,29 +41,43 @@ func (q *Queries) CreateFlight(ctx context.Context, arg CreateFlightParams) (Fli
 		&i.ID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.Departure,
-		&i.Arrival,
 		&i.Price,
 		&i.Date,
+		&i.Route,
 	)
 	return i, err
 }
 
-const getFlights = `-- name: GetFlights :one
-SELECT id, created_at, updated_at, departure, arrival, price, date FROM Flights
+const getFlights = `-- name: GetFlights :many
+SELECT id, created_at, updated_at, price, date, route FROM Flights ORDER BY created_at DESC
 `
 
-func (q *Queries) GetFlights(ctx context.Context) (Flight, error) {
-	row := q.db.QueryRowContext(ctx, getFlights)
-	var i Flight
-	err := row.Scan(
-		&i.ID,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-		&i.Departure,
-		&i.Arrival,
-		&i.Price,
-		&i.Date,
-	)
-	return i, err
+func (q *Queries) GetFlights(ctx context.Context) ([]Flight, error) {
+	rows, err := q.db.QueryContext(ctx, getFlights)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Flight
+	for rows.Next() {
+		var i Flight
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Price,
+			&i.Date,
+			&i.Route,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

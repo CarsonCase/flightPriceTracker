@@ -14,8 +14,13 @@ type Flight struct {
 	ID        uuid.UUID
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	Departure string
-	Arrival   string
 	Price     float64
 	Date      string
+	Route     uuid.UUID
+}
+
+type Route struct {
+	ID        uuid.UUID
+	Departure string
+	Arrival   string
 }

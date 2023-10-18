@@ -1,7 +1,7 @@
 -- name: CreateFlight :one
-INSERT INTO Flights(ID, created_at, updated_at, departure, arrival, date, price)
-VALUES ($1, $2, $3, $4, $5, $6, $7)
+INSERT INTO Flights(ID, created_at, updated_at, route, date, price)
+VALUES ($1, $2, $3, $4, $5, $6)
 RETURNING *;
 
--- name: GetFlights :one
-SELECT * FROM Flights;
+-- name: GetFlights :many
+SELECT * FROM Flights ORDER BY created_at DESC;
