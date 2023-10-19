@@ -34,8 +34,7 @@ func (c *ApiConfig) createFlightHandler(w http.ResponseWriter, r *http.Request) 
 		ID:        uuid.New(),
 		CreatedAt: time.Now().UTC(),
 		UpdatedAt: time.Now().UTC(),
-		Departure: params.Departure,
-		Arrival:   params.Arrival,
+		Route:     params.Route,
 		Date:      params.Date,
 		Price:     params.Price,
 	})

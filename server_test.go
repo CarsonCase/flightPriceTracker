@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -16,15 +17,20 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var params database.Flight = database.Flight{
-	ID:        uuid.UUID{0},
+var route database.Route = database.Route{
+	ID:        uuid.UUID{1},
 	Departure: "RNO",
 	Arrival:   "SFO",
-	Date:      "2023-12-12",
-	Price:     104.3,
 }
 
-func FlightHappyPath(t *testing.T) {
+var params database.Flight = database.Flight{
+	ID:    uuid.UUID{0},
+	Route: uuid.UUID{1},
+	Date:  "2023-12-12",
+	Price: 104.3,
+}
+
+func TestFlightHappyPath(t *testing.T) {
 	// Set up
 	godotenv.Load()
 	sqlString := os.Getenv("DB_URL")
@@ -68,6 +74,8 @@ func FlightHappyPath(t *testing.T) {
 	if err != nil {
 		t.Fatal("Unmarshal error: ", err)
 	}
+	fmt.Println(returnedParams.Price)
+
 	assert.Equal(t, returnedParams.Price, params.Price)
 }
 
@@ -82,7 +90,7 @@ func (c *ApiConfig) getFlight(departure string, arrival string, date string) (*b
 	rr := httptest.NewRecorder()
 
 	// Create your API router and handle the request
-	router := c.setupRouter() // Replace with your router setup function
+	router := c.setupRouter()
 	router.ServeHTTP(rr, req)
 	return rr.Body, rr.Code, nil
 }
