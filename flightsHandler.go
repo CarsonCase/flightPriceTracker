@@ -13,8 +13,13 @@ type Return struct {
 	stuff string
 }
 
-func getFlightsHandler(w http.ResponseWriter, r *http.Request) {
-	RespondWithJson(w, 200, Return{""})
+func (c *ApiConfig) getFlightsHandler(w http.ResponseWriter, r *http.Request) {
+	flights, err := c.DB.GetFlights(r.Context())
+	if err != nil {
+		RespondWithError(w, 400, err.Error())
+		return
+	}
+	RespondWithJson(w, 200, flights)
 }
 
 func (c *ApiConfig) createFlightHandler(w http.ResponseWriter, r *http.Request) {
@@ -40,7 +45,7 @@ func (c *ApiConfig) createFlightHandler(w http.ResponseWriter, r *http.Request) 
 	})
 
 	if err != nil {
-		RespondWithError(w, 400, "couldn't create user"+err.Error())
+		RespondWithError(w, 400, "couldn't create flight"+err.Error())
 	}
 
 	RespondWithJson(w, http.StatusOK, flight)

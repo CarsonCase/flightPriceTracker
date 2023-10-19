@@ -29,8 +29,10 @@ func (c *ApiConfig) setupRouter() *chi.Mux {
 		AllowCredentials: false,
 		MaxAge:           300,
 	}))
-	router.Get("/flights", getFlightsHandler)
+	router.Get("/flights", c.getFlightsHandler)
+	router.Get("/routes", c.getRoutesHandler)
 	router.Post("/flights", c.createFlightHandler)
+	router.Post("/routes", c.createRouteHandler)
 	return router
 }
 
