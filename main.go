@@ -1,8 +1,9 @@
 package main
 
 import (
+	"crypto/rand"
 	"database/sql"
-	"fmt"
+	"encoding/hex"
 	"log"
 	"net/http"
 	"os"
@@ -15,10 +16,14 @@ import (
 )
 
 type ApiConfig struct {
-	DB *database.Queries
+	DB       *database.Queries
+	adminKey string
 }
 
 func (c *ApiConfig) setupRouter() *chi.Mux {
+	// generate a new admin key
+	c.adminKey = generateAdminKey()
+
 	router := chi.NewRouter()
 
 	router.Use(cors.Handler(cors.Options{
@@ -31,12 +36,28 @@ func (c *ApiConfig) setupRouter() *chi.Mux {
 	}))
 	router.Get("/flights", c.getFlightsHandler)
 	router.Get("/routes", c.getRoutesHandler)
-	router.Post("/flights", c.createFlightHandler)
-	router.Post("/routes", c.createRouteHandler)
+
+	adminRouter := chi.NewRouter()
+	adminRouter.Use(c.AuthMiddleware)
+
+	adminRouter.Post("/flights", c.createFlightHandler)
+	adminRouter.Post("/routes", c.createRouteHandler)
+	router.Mount("/api", adminRouter)
+
 	return router
 }
 
+func generateAdminKey() string {
+	keyBytes := make([]byte, 32)
+	if _, err := rand.Read(keyBytes); err != nil {
+		// Handle the error
+	}
+	apiKey := hex.EncodeToString(keyBytes)
+	return apiKey
+}
+
 func main() {
+
 	godotenv.Load()
 	portString := os.Getenv("SERVER_PORT")
 
@@ -59,11 +80,11 @@ func main() {
 	}
 
 	log.Printf("Server starting on port %v\n", portString)
+	log.Printf("Admin API key: %v\n", apiCfg.adminKey)
 
 	err = srv.ListenAndServe()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Printf(portString)
 }

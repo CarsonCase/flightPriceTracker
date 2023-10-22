@@ -19,7 +19,7 @@ func (c *ApiConfig) getFlightsHandler(w http.ResponseWriter, r *http.Request) {
 		RespondWithError(w, 400, err.Error())
 		return
 	}
-	RespondWithJson(w, 200, flights)
+	RespondWithJson(w, http.StatusOK, flights)
 }
 
 func (c *ApiConfig) createFlightHandler(w http.ResponseWriter, r *http.Request) {
