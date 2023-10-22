@@ -1,0 +1,1 @@
+ALTER TABLE Flights DROP COLUMN date;
