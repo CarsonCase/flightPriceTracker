@@ -3,16 +3,51 @@ package main
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/CarsonCase/flightPriceTracker.git/pkg/PriceService"
+	"github.com/CarsonCase/flightPriceTracker.git/pkg/database"
 )
+
+type priceRoutine struct {
+	route   database.Route
+	channel chan float64
+}
+
+func IterateDates(startDateStr string, endDateStr string, p priceRoutine) {
+	// Define the date format
+	dateFormat := "01-02-2006"
+
+	// Parse the start and end dates
+	startDate, err := time.Parse(dateFormat, startDateStr)
+	if err != nil {
+		fmt.Println("Error parsing start date:", err)
+		return
+	}
+
+	endDate, err := time.Parse(dateFormat, endDateStr)
+	if err != nil {
+		fmt.Println("Error parsing end date:", err)
+		return
+	}
+
+	// Calculate the difference in days
+	days := int(endDate.Sub(startDate).Hours() / 24)
+
+	// Iterate through each day
+	for i := 0; i <= days; i++ {
+		date := startDate.AddDate(0, 0, i)
+		go getPrice(p.route.Departure, p.route.Arrival, date.Format(dateFormat), p.channel)
+	}
+}
 
 func getPrice(departure string, arrival string, date string, c chan float64) {
 	price, err := PriceService.GetPrice(departure, arrival, date)
-	if err != nil {
-		fmt.Printf("Error getting price")
+	if err == nil {
+		c <- price
+	} else {
+		c <- 0
 	}
-	c <- price
 }
 
 func goFlight(startDate string, endDate string) {
@@ -24,13 +59,14 @@ func goFlight(startDate string, endDate string) {
 	prices := make(chan float64)
 
 	for _, route := range routes {
-		// need a way to for loop through dates :( time.Time probably
-		date := "12-12-2023"
-		go getPrice(route.Departure, route.Arrival, date, prices)
+		go IterateDates(startDate, endDate, priceRoutine{route, prices})
 	}
 
-	x := <-prices
-	fmt.Printf("Price: %v", x)
+	for i := range prices {
+		fmt.Printf("Price: %v", i)
+	}
+	close(prices)
+
 }
 
 // goFlight commands

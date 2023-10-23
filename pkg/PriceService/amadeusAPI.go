@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -66,7 +67,7 @@ func sendRequest(req *http.Request) (respBody []byte, err error) {
 	resp, err := client.Do(req)
 
 	if resp.StatusCode != 200 {
-		return []byte{}, errors.New("Request Failed. Check inputs.")
+		return []byte{}, errors.New("Request Failed with status code " + fmt.Sprint(resp.StatusCode) + ". Check inputs.")
 	}
 	if err != nil {
 		return []byte{}, err
@@ -82,7 +83,7 @@ func sendRequest(req *http.Request) (respBody []byte, err error) {
 }
 
 func initAmadeusAuth() (*AmadeusAuth, error) {
-	godotenv.Load("../.env")
+	godotenv.Load()
 	apiKey := os.Getenv("API_KEY")
 	apiSecret := os.Getenv("API_SECRET")
 	apiURL := oauth2TokenURL
