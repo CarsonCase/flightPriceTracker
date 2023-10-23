@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func getPrice(departureDest string, arrivalDest string, date string) (float64, error) {
+func GetPrice(departureDest string, arrivalDest string, date string) (float64, error) {
 	// make request to getPrice endpoint with auth token
 	auth, err := initAmadeusAuth()
 
