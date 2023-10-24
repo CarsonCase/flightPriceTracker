@@ -1,12 +1,18 @@
 package main
 
 import (
+	"bufio"
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"log"
+	"net/http"
 	"os"
 	"time"
 
 	"github.com/CarsonCase/flightPriceTracker.git/pkg/PriceService"
 	"github.com/CarsonCase/flightPriceTracker.git/pkg/database"
+	"github.com/google/uuid"
 )
 
 type priceRoutine struct {
@@ -69,6 +75,33 @@ func goFlight(startDate string, endDate string) {
 
 }
 
+// helper function to post a route
+func postRoute(adminKey string, departure string, arrival string) (int, error) {
+	routeParams := database.Route{uuid.UUID{}, departure, arrival}
+	requestBody, err := json.Marshal(routeParams)
+	if err != nil {
+		return 0, err
+	}
+
+	// Create a request to the GET /flights endpoint
+	req, err := http.NewRequest("POST", "http://localhost:8000/api/routes", bytes.NewBuffer(requestBody))
+	if err != nil {
+		return 0, err
+	}
+
+	req.Header.Add("Authorization", adminKey)
+
+	client := &http.Client{}
+
+	resp, err := client.Do(req)
+
+	if err != nil {
+		return 0, err
+	}
+	fmt.Println(resp)
+	return resp.StatusCode, nil
+}
+
 // goFlight commands
 // start [start date] [end date]
 // new-route [departure] [arrival]
@@ -87,7 +120,22 @@ func main() {
 		}
 	case "new-route":
 		{
+			fmt.Println("Enter API Key for goFlight server:")
+			reader := bufio.NewReader(os.Stdin)
+			apiKey, err := reader.ReadString('\n')
+			if err != nil {
+				log.Fatal(err)
+			}
 
+			code, err := postRoute(apiKey, args[1], args[2])
+
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			if code != http.StatusOK {
+				log.Fatal(code)
+			}
 		}
 	}
 }
