@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/CarsonCase/flightPriceTracker.git/pkg/PriceService"
@@ -75,7 +76,6 @@ func goFlight(startDate string, endDate string) {
 
 }
 
-// helper function to post a route
 func postRoute(adminKey string, departure string, arrival string) (int, error) {
 	routeParams := database.Route{uuid.UUID{}, departure, arrival}
 	requestBody, err := json.Marshal(routeParams)
@@ -83,13 +83,14 @@ func postRoute(adminKey string, departure string, arrival string) (int, error) {
 		return 0, err
 	}
 
-	// Create a request to the GET /flights endpoint
+	// Create a request to the POST /routes endpoint
 	req, err := http.NewRequest("POST", "http://localhost:8000/api/routes", bytes.NewBuffer(requestBody))
 	if err != nil {
 		return 0, err
 	}
 
-	req.Header.Add("Authorization", adminKey)
+	// Set the 'Authorization' header with the admin key
+	req.Header.Set("Authorization", adminKey)
 
 	client := &http.Client{}
 
@@ -98,7 +99,8 @@ func postRoute(adminKey string, departure string, arrival string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	fmt.Println(resp)
+	defer resp.Body.Close() // Close the response body
+
 	return resp.StatusCode, nil
 }
 
@@ -126,6 +128,8 @@ func main() {
 			if err != nil {
 				log.Fatal(err)
 			}
+
+			apiKey = strings.TrimRight(apiKey, "\n")
 
 			code, err := postRoute(apiKey, args[1], args[2])
 
