@@ -28,17 +28,17 @@ dbdown:
 # Apply migrations
 .PHONY: migrate-up
 up:
-	migrate -database $(DB_URL) -path $(MIGRATION_PATH) up
+	migrate -database $(DB_URL) -path cmd/server/$(MIGRATION_PATH) up
 
 # Rollback migrations
 .PHONY: migrate-down
 down:
-	migrate -database $(DB_URL) -path $(MIGRATION_PATH) down
+	migrate -database $(DB_URL) -path cmd/server/$(MIGRATION_PATH) down
 
 # View migration status
 .PHONY: migrate-status
 status:
-	migrate -database $(DB_URL) -path $(MIGRATION_PATH) status
+	migrate -database $(DB_URL) -path cmd/server/$(MIGRATION_PATH) status
 
 server:
 	go build ./cmd/server
