@@ -113,11 +113,7 @@ func main() {
 	switch args[0] {
 	case "help":
 		{
-			fmt.Println("GoFlight commands\nstart [start date] [end date] - start a new service for all routes between the start and end dates\nnew-route [departure] [arrival] publish a new route. Will require an API key which is provided on server startup")
-		}
-	case "start":
-		{
-			goFlight(args[1], args[2])
+			fmt.Println("GoFlight commands\nnew-route [departure] [arrival] publish a new route. Will require an API key which is provided on server startup")
 		}
 	case "new-route":
 		{
@@ -140,5 +136,7 @@ func main() {
 				log.Fatal(code)
 			}
 		}
+	default:
+		log.Fatal("Invalid selection. Run `goFlight help` for more information")
 	}
 }

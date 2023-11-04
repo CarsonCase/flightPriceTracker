@@ -13,12 +13,12 @@ First and foremost. Flight price tracker is meant to be a portfolio project for 
 6. Go to http://localhost:8080 to see the db adminer dashboard
 7. Use `make up` and `make down` to migrate your database up and down. Migrations are stored in cmd/server/sql/migrations
 8. Use `dbdown` to shut off the database
-9. Here run `make goFlight`` to build the goFlight executable
+9. Run `make goFlight`` to build the goFlight executable
 10. ./goFlight help to see goFlight commands
 11. run `make server` to build server
 12. ./server will run the server and print the API key needed for `./goFlight add-route`
-13. Use `./goFlight add-route` to publish routes
+13. Use `./goFlight add-route` to publish routes. The scraper will publish flight price data for each route logged
+14. scraper/flight_analysis contains the selenium scraper to scrape Kayak for average prices of flights. Make sure that chromedriver["https://skolo.online/documents/webscrapping/#step-2-install-chromedriver] is installed
+15. Run `python main.py` to begin the scraper. You may also run this on a different machine from the scraper if you adjust URL in the script.
 
-Note. Sort of the end here. At least until I'm willing to pay for Amadeus API which atm I am not.
-
-
+You now have a SQL database filled with Routes and cooresponding flight price data, as well as a server serving this database
