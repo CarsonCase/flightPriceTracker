@@ -33,7 +33,8 @@ up:
 # Rollback migrations
 .PHONY: migrate-down
 down:
-	migrate -database $(DB_URL) -path cmd/server/$(MIGRATION_PATH) down
+	migrate -database $(DB_URL) -path cmd/server/$(MIGRATION_PATH) down $(NUM_MIGRATIONS)
+
 
 # View migration status
 .PHONY: migrate-status
