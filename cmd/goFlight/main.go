@@ -73,7 +73,6 @@ func goFlight(startDate string, endDate string) {
 		fmt.Printf("Price: %v", i)
 	}
 	close(prices)
-
 }
 
 func postRoute(adminKey string, departure string, arrival string) (int, error) {
