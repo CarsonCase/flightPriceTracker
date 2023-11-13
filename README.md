@@ -22,3 +22,9 @@ First and foremost. Flight price tracker is meant to be a portfolio project for 
 15. Run `python main.py` to begin the scraper. You may also run this on a different machine from the scraper if you adjust URL in the script.
 
 You now have a SQL database filled with Routes and cooresponding flight price data, as well as a server serving this database
+
+# Frontend
+The repo for a simple frontend interface is here[https://github.com/CarsonCase/FlightPriceTrackerWeb]
+
+This is what you can expect from running the entire codebase together. Note there are some hardcoded "localhosts" so you may need to change them if you're looking to properly host this system.
+![Image of the frontend](<Screenshot from 2023-11-13 14-17-36.png>)
