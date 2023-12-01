@@ -24,10 +24,12 @@ def postFlight(apiKey, route, date, result):
 
 def alreadyExists(route, date):
     response = requests.get("http://localhost:8000/flights")
-    for flight in response.json():
-        if flight["Date"] == date and flight["Route"] == route:
-            print("Already exists: " + str(date) +"\t" + str(route))
-            return True
+    flights = response.json()
+    if flights:
+        for flight in flights:
+            if flight["Date"] == date and flight["Route"] == route:
+                print("Already exists: " + str(date) +"\t" + str(route))
+                return True
 
     return False
 
