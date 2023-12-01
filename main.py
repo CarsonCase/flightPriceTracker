@@ -3,8 +3,8 @@ import requests
 import pandas as pd
 from datetime import datetime, timedelta
 
-urlRoutes = "http://localhost:8000/routes"
-urlFlights = "http://localhost:8000/flights"
+baseURL = "http://81.4.109.207:8000"
+daysToScan = 20
 
 # todo: get api key from argument
 def postFlight(apiKey, route, date, result):
@@ -19,11 +19,11 @@ def postFlight(apiKey, route, date, result):
         "Price": result.data["Price ($)"].mean()
     }
 
-    response = requests.post("http://localhost:8000/api/flights", headers=headers, json=flight_data)
+    response = requests.post(baseURL+"/api/flights", headers=headers, json=flight_data)
     print(response)
 
 def alreadyExists(route, date):
-    response = requests.get("http://localhost:8000/flights")
+    response = requests.get(baseURL+"/flights")
     flights = response.json()
     if flights:
         for flight in flights:
@@ -35,9 +35,8 @@ def alreadyExists(route, date):
 
 def main():
     # DAYS IN THE FUTURE TO SCAN
-    daysToScan = 2
     apiKey = input("Enter API Key for goFlight server:")
-    resp = requests.get(urlRoutes)
+    resp = requests.get(baseURL+"/routes")
     routesData = resp.json()
 
     dates = pd.date_range((datetime.today() + timedelta(1)), (datetime.today() + timedelta(daysToScan))).tolist()
