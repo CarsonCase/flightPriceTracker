@@ -55,8 +55,8 @@ def main():
                     result = Scrape(route["Departure"], route["Arrival"], date)
                     ScrapeObjects(result)
                     postFlight(apiKey, route, date, result)
-                except:
-                    print()
+                except OSError as err:
+                    print(err)
                     failedCount += 1
         print("For Route: " +str(route) +"\nPublished: "+str(daysToScan - failedCount) + " of: " + str(daysToScan))
         failedCount = 0
