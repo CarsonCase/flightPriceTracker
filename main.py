@@ -57,6 +57,8 @@ def main():
                 except OSError as err:
                     print(err)
                     failedCount += 1
+                except ValueError as valerr:
+                    print("Value Error at: ", date,"\t last elemnt of array: ", dates[:-1])
         print("For Route: " +str(route) +"\nPublished: "+str(daysToScan - failedCount) + " of: " + str(daysToScan))
         failedCount = 0
 
